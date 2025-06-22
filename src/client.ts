@@ -342,6 +342,67 @@ export class NSScript {
 	}
 
 	/**
+	 * Attempts to edit or appoint a regional officer in a region (given that the current nation has Executive authority there).
+	 * @param nationName The nation to give said office to.
+	 * @param officeName The office name to use.
+	 * @param authority Authority to give to the officer: 
+	 * "A" for Appearance, "B" for Border Control, "C" for Communications, "E" for Embassies, "P" for Polls and "S" for Successor.
+	 * Example: "ACEP" will set the office's authority to Appearance, Communications, Embassies and Polls.
+	 * @param regionName The name of the region to edit/create the office in. If not given, defaults to the current region.
+	 * @returns A Promise that resolves to true if the operation is successful, false otherwise.
+	 */
+	public async editRegionalOfficer(
+		nationName: string,
+		officeName: string,
+		authority: string,
+		regionName?: string,
+	): Promise<boolean> {
+		return region.handleEditRO(this, nationName, officeName, authority, regionName);
+	}
+
+	/**
+	 * Attempts to dismiss a regional officer in a region (given that the current nation has Executive authority there).
+	 * @param nationName The officer to dismiss.
+	 * @param regionName The name of the region to dismiss the office in. If not given, defaults to the current region.
+	 * @returns A Promise that resolves to true if the operation is successful, false otherwise.
+	 */
+	public async dismissRegionalOfficer(
+		nationName: string,
+		regionName?: string,
+	): Promise<boolean> {
+		return region.handleDismissRO(this, nationName, regionName);
+	}
+
+	/**
+	 * Attempts to edit the delegate's authority in a region (given that the current nation has Executive authority there).
+	 * @param authority Authority to give to the delegate: 
+	 * "A" for Appearance, "B" for Border Control, "C" for Communications, "E" for Embassies, "P" for Polls and "X" for Executive.
+	 * Example: "ACEP" will set the office's authority to Appearance, Communications, Embassies and Polls.
+	 * World Assembly authority is always set and cannot be turned off.
+	 * @param regionName The name of the region to edit the delegacy of. If not given, defaults to the current region.
+	 * @returns A Promise that resolves to true if the operation is successful, false otherwise.
+	 */
+	public async editDelegate(
+		authority: string,
+		regionName?: string,
+	): Promise<boolean> {
+		return region.handleEditDelegate(this, authority, regionName);
+	}
+
+	/**
+	 * Attempts to edit the governor's title in a region (given that the current nation has Executive authority there).
+	 * @param officeName The title to give the Governor.
+	 * @param regionName The name of the region to edit the Governorship of. If not given, defaults to the current region.
+	 * @returns A Promise that resolves to true if the operation is successful, false otherwise.
+	 */
+	public async renameGovernor(
+		officeName: string,
+		regionName?: string,
+	): Promise<boolean> {
+		return region.handleRenameGovernor(this, officeName, regionName);
+	}
+
+	/**
 	 * Attempts to apply to or reapply to the World Assembly.
 	 * @param reapply Whether to reapply to the World Assembly if you've already recently applied
 	 * @returns A Promise that resolves to true if the application is successful, false otherwise.
