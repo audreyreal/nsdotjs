@@ -98,12 +98,15 @@ export class NSScript {
 			// Construct the value for the 'script' parameter
 			const scriptParamValue = `${this.scriptName} v${this.scriptVersion} by ${this.scriptAuthor} in use by ${this.currentUser}`;
 
+			// These will be passed as URL search parameters.
 			const requestParams = new URLSearchParams();
+			// These will be passed as form data in the request body.
+			const payloadParams = new URLSearchParams();
 
-			// Add payload data to requestParams if provided
+			// Add payload data to payloadParams if provided
 			if (payload) {
 				Object.entries(payload).forEach(([key, value]) => 
-					requestParams.append(key, String(value)));
+					payloadParams.append(key, String(value)));
 			}
 
 			// Add special parameters
@@ -113,27 +116,28 @@ export class NSScript {
 				requestParams.append("template-overall", "none");
 			}
 
-			// inject auth values
+			// inject auth values into payload
 			//
 			// man past me was such a genius
 			// for figuring out you can do this lmfao
 			const lastKnownChk = localStorage.getItem("lastKnownChk");
 			if (lastKnownChk) {
-				requestParams.append("chk", lastKnownChk);
+				payloadParams.append("chk", lastKnownChk);
 			}
 			const lastKnownLocalid = localStorage.getItem("lastKnownLocalid");
 			if (lastKnownLocalid) {
-				requestParams.append("localid", lastKnownLocalid);
+				payloadParams.append("localid", lastKnownLocalid);
 			}
 
 			// Ensure the baseUrl has a trailing slash for correct URL resolution
 			const safeBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
-			const finalUrl = new URL(pagePath, safeBaseUrl).toString();
+			const finalUrl = new URL(pagePath, safeBaseUrl);
+			finalUrl.search = requestParams.toString();
 
-			const response = await fetch(finalUrl, {
+			const response = await fetch(finalUrl.toString(), {
 				credentials: "include",
 				method: "POST",
-				body: requestParams.toString(),
+				body: payloadParams,
 				redirect: followRedirects ? "follow" : "manual",
 			});
 			return response;
