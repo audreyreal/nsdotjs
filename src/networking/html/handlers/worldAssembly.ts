@@ -73,7 +73,7 @@ export async function handleResign(context: NSScript): Promise<boolean> {
 		submit: "1",
 	});
 	if (
-		text.includes("From context moment forward, your nation is on its own.")
+		text.includes("From this moment forward, your nation is on its own.")
 	) {
 		context.statusBubble.success("Resigned from World Assembly");
 		return true;
