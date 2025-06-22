@@ -98,9 +98,8 @@ export async function handleEndorse(
 			nation: nationName,
 			action: "endorse",
 		},
-		false,
 	);
-	const location = response.headers.get("location") || "";
+	const location = response.url;
 
 	if (location.includes(`nation=${canonicalize(nationName)}`)) {
 		context.statusBubble.success(`Endorsed ${prettify(nationName)}`);
@@ -126,9 +125,8 @@ export async function handleUnendorse(
 			nation: nationName,
 			action: "unendorse",
 		},
-		false,
 	);
-	const location = response.headers.get("location") || "";
+	const location = response.url;
 
 	if (location.includes(`nation=${canonicalize(nationName)}`)) {
 		context.statusBubble.success(`Unendorsed ${prettify(nationName)}`);
