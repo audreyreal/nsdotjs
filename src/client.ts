@@ -72,6 +72,15 @@ export class NSScript {
 	}
 
 	/**
+	 * Decides which NationStates domain to send requests to.
+	 * @returns fast.nationstates.net if on the fast site, www.nationstates.net otherwise.
+	 */
+	private getRequestDomain(): string {
+		if(window.location.host == "fast.nationstates.net") return "fast.nationstates.net";
+		return "www.nationstates.net";
+	}
+
+	/**
 	 * Makes a request to a page on the NationStates HTML site.
 	 * @param pagePath The path to the page on NationStates (e.g., "index.html", "page=create_nation").
 	 *                This path is relative to "https://www.nationstates.net/".
@@ -93,7 +102,7 @@ export class NSScript {
 		simultaneity.handleLock(this); // Locks submit buttons and sets the request in progress state
 		try {
 			this.statusBubble.info(`Loading: ${pagePath}...`);
-			const baseUrl = "https://www.nationstates.net/";
+			const baseUrl = `https://${this.getRequestDomain()}/`;
 
 			// Construct the value for the 'script' parameter
 			const scriptParamValue = `${this.scriptName} v${this.scriptVersion} by ${this.scriptAuthor} in use by ${this.currentUser}`;
