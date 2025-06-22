@@ -24,7 +24,7 @@ export async function handleApply(
 		};
 	}
 
-	const text = await context.getNsHtmlPage("page=UN_Status", payload);
+	const text = await context.getNsHtmlPage("page=UN_status", payload);
 	if (
 		text.includes(
 			"Your application to join the World Assembly has been received!",
@@ -49,7 +49,7 @@ export async function handleJoin(
 	nationName: string,
 	appId: string,
 ): Promise<boolean> {
-	const text = await context.getNsHtmlPage("cgi-bin/", {
+	const text = await context.getNsHtmlPage("cgi-bin/join_un.cgi", {
 		nation: nationName,
 		appid: appId.trim(),
 	});
@@ -68,7 +68,7 @@ export async function handleJoin(
  * @returns A Promise that resolves to true if the resignation is successful, false otherwise.
  */
 export async function handleResign(context: NSScript): Promise<boolean> {
-	const text = await context.getNsHtmlPage("page=UN_Status", {
+	const text = await context.getNsHtmlPage("page=UN_status", {
 		action: "leave_UN",
 		submit: "1",
 	});
