@@ -91,6 +91,7 @@ export class NSScript {
 		pagePath: string,
 		payload?: Record<string, string | number | boolean>,
 		followRedirects = true,
+		shouldUnlockSimul = true,
 	): Promise<Response> {
 		if (!simultaneity.handleCheck(this)) {
 			return Promise.reject(
@@ -149,9 +150,20 @@ export class NSScript {
 				body: payloadParams,
 				redirect: followRedirects ? "follow" : "manual",
 			});
+
+			// if false, it's probably getNsHtmlPage() which will unlock simultaneity itself
+			if(shouldUnlockSimul) {
+				// When using Fetch API, buttons can be re-enabled once the Promise returned 
+				// from one of the Response object's methods (such as text()) is resolved.
+				response.blob().then((_) => {
+					simultaneity.handleUnlock(this); // Unlocks submit buttons and clears the request in progress state
+				});
+			}
+
 			return response;
-		} finally {
+		} catch (err: any) {
 			simultaneity.handleUnlock(this); // Unlocks submit buttons and clears the request in progress state
+			throw err;
 		}
 	}
 
@@ -167,11 +179,22 @@ export class NSScript {
 		pagePath: string,
 		payload?: Record<string, string | number | boolean>,
 	): Promise<string> {
-		const response = await this.makeNsHtmlRequest(pagePath, payload);
+		const response = await this.makeNsHtmlRequest(pagePath, payload, true, false);
 		if (!response.ok) {
+			// When using Fetch API, buttons can be re-enabled once the Promise returned 
+			// from one of the Response object's methods (such as text()) is resolved.
+			response.text().then((_) => {
+				simultaneity.handleUnlock(this); // Unlocks submit buttons and clears the request in progress state
+			});
+
 			throw new Error(`Failed to fetch page: ${response.statusText}`);
 		}
 		const text = await response.text();
+
+		// When using Fetch API, buttons can be re-enabled once the Promise returned 
+		// from one of the Response object's methods (such as text()) is resolved.
+		simultaneity.handleUnlock(this); // Unlocks submit buttons and clears the request in progress state
+		
 		if (text.includes("Failed security check")) {
 			throw new Error(
 				"Failed security check. Please run reauth and try again.",
