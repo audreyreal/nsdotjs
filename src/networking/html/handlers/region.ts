@@ -213,4 +213,138 @@ export async function handleTag(
 	);
 	return false;
 }
-// TODO: add adding tags to regions, as well as uploading flags/banners, as well as detag wfe's from pauls website
+
+export async function handleEditRO(
+	context: NSScript,
+	nationName: string,
+	officeName: string,
+	authority: string,
+	regionName?: string,
+): Promise<boolean> {
+	const payload: Record<string, string> = {
+		nation: nationName,
+		office_name: officeName,
+		editofficer: "1",
+	};
+
+	if(authority.includes("A")) payload.authority_A = "on";
+	if(authority.includes("B")) payload.authority_B = "on";
+	if(authority.includes("C")) payload.authority_C = "on";
+	if(authority.includes("E")) payload.authority_E = "on";
+	if(authority.includes("P")) payload.authority_P = "on";
+	if(authority.includes("S")) payload.authority_S = "on";
+
+	let page = "page=region_control";
+	if(regionName) {
+		page += `/region=${regionName}`;
+		payload.region = regionName;
+	}
+
+	const text = await context.getNsHtmlPage(page, payload);
+	if(text.includes("Appointed") && text.includes("with authority over")) {
+		context.statusBubble.success(`Appointed ${prettify(nationName)} as RO`);
+		return true;
+	}
+	if (text.includes("Renamed the authority held by") 
+		|| ((text.includes("authority from") || text.includes("authority to")) 
+		&& (text.includes("Removed") || text.includes("Granted")))) {
+		context.statusBubble.success(`Edited ${prettify(nationName)}'s office`);
+		return true;
+	}
+	context.statusBubble.warn(
+		`Failed to appoint/edit ${prettify(nationName)} as RO`,
+	);
+	return false;
+}
+
+export async function handleDismissRO(
+	context: NSScript,
+	nationName: string,
+	regionName?: string,
+): Promise<boolean> {
+	const payload: Record<string, string> = {
+		nation: nationName,
+		abolishofficer: "1",
+	};
+
+	let page = "page=region_control";
+	if(regionName) {
+		page += `/region=${regionName}`;
+		payload.region = regionName;
+	}
+
+	const text = await context.getNsHtmlPage(page, payload);
+	if(text.includes("Dismissed") && text.includes("as")) {
+		context.statusBubble.success(`Dismissed ${prettify(nationName)} from office`);
+		return true;
+	}
+	context.statusBubble.warn(
+		`Failed to dismiss ${prettify(nationName)} from office`,
+	);
+	return false;
+}
+
+export async function handleEditDelegate(
+	context: NSScript,
+	authority: string,
+	regionName?: string,
+): Promise<boolean> {
+	const payload: Record<string, string> = {
+		office: "delegate",
+		editofficer: "1",
+		authority_W: "on", // world assembly authority always on
+	};
+
+	if(authority.includes("A")) payload.authority_A = "on";
+	if(authority.includes("B")) payload.authority_B = "on";
+	if(authority.includes("C")) payload.authority_C = "on";
+	if(authority.includes("E")) payload.authority_E = "on";
+	if(authority.includes("P")) payload.authority_P = "on";
+	if(authority.includes("X")) payload.authority_X = "on";
+
+	let page = "page=region_control";
+	if(regionName) {
+		page += `/region=${regionName}`;
+		payload.region = regionName;
+	}
+
+	const text = await context.getNsHtmlPage(page, payload);
+	if (text.includes("Set Delegate authority to:")) {
+		context.statusBubble.success("Modified delegate authority");
+		return true;
+	}
+	context.statusBubble.warn(
+		"Failed to modify delegate authority",
+	);
+	return false;
+}
+
+export async function handleRenameGovernor(
+	context: NSScript,
+	officeName: string,
+	regionName?: string,
+): Promise<boolean> {
+	const payload: Record<string, string> = {
+		office: "governor",
+		office_name: officeName,
+		editofficer: "1",
+	};
+
+	let page = "page=region_control";
+	if(regionName) {
+		page += `/region=${regionName}`;
+		payload.region = regionName;
+	}
+
+	const text = await context.getNsHtmlPage(page, payload);
+	if (text.includes("Renamed the Governor's office")) {
+		context.statusBubble.success("Renamed Governor");
+		return true;
+	}
+	context.statusBubble.warn(
+		"Failed to rename Governor",
+	);
+	return false;
+}
+
+// TODO: uploading flags/banners, as well as detag wfe's from pauls website
